@@ -4,164 +4,135 @@
 #include <io.h>
 #include<sys/time.h>
 
-
-int charcalculate(char *file) /*字符统计*/
-{
-	 int c=0;
+/*字符统计*/
+int CharNum(char *file){
+	 int count = 0;
 	 FILE *fp;
      char a;
 	 fp=fopen(file,"r");
-	 while(!feof(fp))
-	 {
-		 a=fgetc(fp);
-		    if(a!=' '&&a!='\n'&&a!='\t')
-               c++;
-			
+	 //开始
+	 while(!feof(fp)){
+	 	a=fgetc(fp);
+	 	if(a!=' '&&a!='\n'&&a!='\t')	
+		//除空格 换行 tab外 都当作一个字符 
+	 	count++;
 	 }
 	 fclose(fp); 
-	 c--;
-	 return c;
+	 count--;
+	 return count;
 }
 
-int wordcalculate(char *file)   /*词数统计*/
-{
-	 int w=0;
+/*词数统计*/
+int WordNum(char *file){
+	 int w = 0;
 	 FILE *fp;
-	 int a,t=10;
-	 int mark=0;
-	 fp=fopen(file,"r");
-	 if (charcalculate(file)==0)
-         w=0;  
-	 else
-	 {
-		 while(!feof(fp))
-	 {
-		 a=fgetc(fp);
-		    if(a==32||a==10||a==9) //        ' '||'\n'||'\t'
-               mark++;
+	 int a,t = 10;
+	 int mark = 0;
+	 fp = fopen(file,"r");
+	 //开始
+	 if (CharNum(file)==0)	w = 0;
+	 else{
+		while(!feof(fp)){
+		 	a = fgetc(fp);
+		    if(a==32||a==10||a==9)	mark++;
+			//   ' '||'\n'||'\t'
             else{
-            	if(a==-1) t=mark;
-            	mark=0;
+            	if(a==-1) t = mark;
+            	mark = 0;
             }
-            if(mark==1) w++;
-	//printf("w数量：%d mark:%d t:%d word:%d和%c\n",w,mark,t,a,a);
-	 }
-	 if(t==0) w++;
+            if(mark==1)	w++;
+	 	}
+	 	if(t==0) w++;
 	 }
 	 fclose(fp);
 	 return w;
 }
 
-int linecalculate(char *file)  /*行数统计*/
-{
-	 int l=0;
+/*行数统计*/
+int LineNum(char *file){
+	 int count = 0;
 	 FILE *fp;
      fp=fopen(file,"r");
 	 char a;
-	 while(!feof(fp))
-	 {
-		 a=fgetc(fp);
-		    if(a=='\n')
-               l++;
+	 //开始
+	 while(!feof(fp)){
+		a=fgetc(fp);
+		if(a=='\n')	count++;
 	 }
-	 fclose(fp); 
-	 return l;
+	 fclose(fp);
+	 return count;
 }
 
-int searchfile(void)    /*寻找目录下txt文件*/
-{
+/*寻找目录下txt、cpp文件*/
+int searchfile(void){
     //文件存储信息结构体 
-    struct _finddata_t fileinfo;
-    //保存文件句柄 
-    long fHandle;
-    //文件数记录器
+    struct _finddata_t fileinfo;	//保存文件句柄 
+    long fHandle;	//文件数记录器
+    //开始
+    //check .txt 
     int t=0;
-       if( (fHandle=_findfirst( "*txt", &fileinfo )) == -1L ) 
-		{
+    if( (fHandle=_findfirst( "*txt", &fileinfo )) == -1L ){
         printf( "当前目录下没有txt文件\n");
-		
-		}
+	}
     else
     do{
-		 t++;
+		t++;
 		printf("找到文件:%s\n", fileinfo.name);
-	}while (_findnext(fHandle,&fileinfo)==0);
+	}while(_findnext(fHandle,&fileinfo)==0);
 	printf("txt文件数量：%d\n",t);
-	
+	//check .cpp
 	t=0;
-       if( (fHandle=_findfirst( "*cpp", &fileinfo )) == -1L ) 
-		{
+    if( (fHandle=_findfirst( "*cpp", &fileinfo )) == -1L ){
         printf( "当前目录下没有cpp文件\n");
-		
-		}
+	}
     else
     do{
 		 t++;
 		printf("找到文件:%s\n", fileinfo.name);
 	}while (_findnext(fHandle,&fileinfo)==0);
 	printf("cpp文件数量：%d\n",t);	
-	
-	
     _findclose(fHandle);
-
     
     return 0;
 }
 
-void MoreData(char *file)  /*更多统计*/
-{
-	 FILE *f;
-     f=fopen(file,"r");
+/*更多统计*/
+void MoreData(char *file){
+	FILE *f;
+    f=fopen(file,"r");
     int letter = 0, code = 0, empty = 0, note = 0, mark = 0, notemark = 0;
-    /*
-    接受字符，代码行数，空行数，注释行数，类型标记，注释行标记
-    mark的参数：0空行，1存在格式化字符的空行，2代码行，3注释行
-    notemark参数：0未判定，1单行注释，2多行注释
-    */
-    while (!feof(f))
-    {
+    //开始 
+    while (!feof(f)){
         letter = fgetc(f);
-        if (mark == 0 || mark == 1) //判定空行
-        {
-            if (letter == ' ')
-                continue;
-            else if (letter == '\n')
-            {
+        //判定空行
+        if (mark == 0 || mark == 1){
+            if (letter == ' ')	continue;
+            else if (letter == '\n'){
                 empty++;
                 mark = 0;
                 continue;
             }
-            else if ((letter == '{' || letter == '}') && mark == 0)
-            {
+            else if ((letter == '{' || letter == '}') && mark == 0){
                 mark = 1;
                 continue;
             }
-
-
-            else
-            {
-                if (letter == '/')
-                    mark = 3;
-                else
-                    mark = 2;
-            }
+	        else{
+	            if (letter == '/')	mark = 3;
+	            else	mark = 2;
+	            }
         }
-
-        if (mark == 2) //判定代码行
-        {
+		//判定代码行
+        if (mark == 2){
             while (!feof(f) && letter != '\n')
                 letter = fgetc(f);
             mark = 0;
             code++;
             continue;
         }
-
-        if (mark == 3) //判定注释行
-        {
-            while (!feof(f))
-            {
+		//判定注释行
+        if (mark == 3){
+            while (!feof(f)){
                 letter = fgetc(f);
-
                 if (letter == '/' && notemark == 0) //单行注释起始判定
                     notemark = 1;
                 else if (letter == '*' && notemark == 0) //多行注释起始判定
@@ -169,8 +140,7 @@ void MoreData(char *file)  /*更多统计*/
                 else if (letter == '*' && notemark == 2) //多行注释结束判定
                     notemark = 3;
 
-                if (notemark == 1) //单行注释结束判定
-                {
+                if (notemark == 1){ //单行注释结束判定
                     while (!feof(f) && letter != '\n')
                         letter = fgetc(f);
                     note++;
@@ -179,15 +149,13 @@ void MoreData(char *file)  /*更多统计*/
                     break;
                 }
 
-                if (notemark == 2)  //多行注释中间行数计算
-                {
+                if (notemark == 2){  //多行注释中间行数计算
                     while (!feof(f) && letter != '\n')
                         letter = fgetc(f);
                     note++;
                 }
 
-                if (notemark == 3 && letter == '/') //多行注释结束判定
-                {
+                if (notemark == 3 && letter == '/'){ //多行注释结束判定
                     while (!feof(f) && letter != '\n')
                         letter = fgetc(f);
                     note++;
@@ -200,44 +168,42 @@ void MoreData(char *file)  /*更多统计*/
             }
         }
     }
-    printf("共有空行数 %d  代码行数 %d  注释行数 %d\n", empty, code - 1, note); //除去eof行
+    printf("共有空行数 %d  代码行数 %d  注释行数 %d\n", empty, code - 1, note);
 }
 
-int main (int argc, char *argv[])   /*主函数*/
-{
+/*主函数*/
+int main (int argc, char *argv[]){
 	/* 定义两个结构体 */
+	/* 程序开始之前计时start */
 	struct timeval start;
 	struct timeval end;
 	unsigned long timer;
-	/* 程序开始之前计时start */
 	gettimeofday(&start, NULL);
 
-	   if(!strcmp(argv[1],"-c"))
-	{
-		printf("charnumber:%d\n",charcalculate(argv[2]));
+	/*字符统计*/ 
+	if(!strcmp(argv[1],"-c")){
+		printf("charnumber:%d\n",CharNum(argv[2]));
 	}
-
-	   else if(!strcmp(argv[1],"-w"))
-	{
-		printf("wordnumber:%d\n",wordcalculate(argv[2]));
+	/*词数统计*/
+	else if(!strcmp(argv[1],"-w")){
+		printf("wordnumber:%d\n",WordNum(argv[2]));
 	}
-
-	   else if (!strcmp(argv[1],"-l"))
-	{
-		printf("linenumber:%d\n",linecalculate(argv[2]));
+	/*行数统计*/
+	else if (!strcmp(argv[1],"-l")){
+		printf("linenumber:%d\n",LineNum(argv[2]));
 	}
-	else if(!strcmp(argv[1],"-s"))
-	{
+	/*寻找目录下txt、cpp文件*/
+	else if(!strcmp(argv[1],"-s")){
 		searchfile();
 	}
-	else if(!strcmp(argv[1],"-a"))
-	{
+	/*更多统计*/
+	else if(!strcmp(argv[1],"-a")){
 		MoreData(argv[2]);
 	}
 
 	/* 程序块结束后计时end */
-	gettimeofday(&end, NULL);
 	/* 统计程序段运行时间(unit is usec)*/
+	gettimeofday(&end, NULL);
 	timer = 1000000 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
 	printf("耗时 = %ld us\n", timer);
 
