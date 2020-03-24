@@ -98,77 +98,49 @@ int searchfile(void){
 
 /*更多统计*/
 void MoreData(char *file){
-	FILE *f;
-    f=fopen(file,"r");
-    int letter = 0, code = 0, empty = 0, note = 0, mark = 0, notemark = 0;
-    //开始 
-    while (!feof(f)){
-        letter = fgetc(f);
-        //判定空行
-        if (mark == 0 || mark == 1){
-            if (letter == ' ')	continue;
-            else if (letter == '\n'){
-                empty++;
-                mark = 0;
-                continue;
-            }
-            else if ((letter == '{' || letter == '}') && mark == 0){
-                mark = 1;
-                continue;
-            }
-	        else{
-	            if (letter == '/')	mark = 3;
-	            else	mark = 2;
-	            }
-        }
-		//判定代码行
-        if (mark == 2){
-            while (!feof(f) && letter != '\n')
-                letter = fgetc(f);
-            mark = 0;
-            code++;
-            continue;
-        }
-		//判定注释行
-        if (mark == 3){
-            while (!feof(f)){
-                letter = fgetc(f);
-                if (letter == '/' && notemark == 0) //单行注释起始判定
-                    notemark = 1;
-                else if (letter == '*' && notemark == 0) //多行注释起始判定
-                    notemark = 2;
-                else if (letter == '*' && notemark == 2) //多行注释结束判定
-                    notemark = 3;
-
-                if (notemark == 1){ //单行注释结束判定
-                    while (!feof(f) && letter != '\n')
-                        letter = fgetc(f);
-                    note++;
-                    mark = 0;
-                    notemark = 0;
-                    break;
-                }
-
-                if (notemark == 2){  //多行注释中间行数计算
-                    while (!feof(f) && letter != '\n')
-                        letter = fgetc(f);
-                    note++;
-                }
-
-                if (notemark == 3 && letter == '/'){ //多行注释结束判定
-                    while (!feof(f) && letter != '\n')
-                        letter = fgetc(f);
-                    note++;
-                    mark = 0;
-                    notemark = 0;
-                    break;
-                }
-                else if (notemark == 3 && letter != '*') //判定是否为注释中的*
-                    notemark = 2;
-            }
-        }
+    FILE *fp;
+    char ch;
+    int c = 0, e = 0, n = 0;	//c：code	e：empty	n：note 
+    if ((fp=fopen(file,"r")) == NULL){
+        printf("找不到文件！");
+        exit(0);
     }
-    printf("共有空行数 %d  代码行数 %d  注释行数 %d\n", empty, code - 1, note);
+	//开始 
+    ch = fgetc(fp);
+    while (ch != EOF){
+    	//判断空行数 
+        if (ch == '{' || ch == '}'){
+            e++;
+            ch = fgetc(fp);
+        }
+        else if (ch == '\n'){
+            ch = fgetc(fp);
+            while (ch == '\n'){
+                e++;
+                ch = fgetc(fp);
+            }
+        }
+        //判断注释行数 
+        else if (ch == '/'){
+            ch = fgetc(fp);
+            if (ch == '/')
+            while (ch != '\n')	ch = fgetc(fp);
+            n++;
+            ch = fgetc(fp);
+        }
+        //判断代码行数 
+        else{
+            c++;
+            while (ch != '{'&&ch != '}'&&ch != '\n'&&ch != '/'&&ch != EOF){
+                ch = fgetc(fp);
+            }
+        }
+
+    }
+    printf("代码行数 ：%d.\n", c);
+    printf("空行数 ：%d.\n", e);
+    printf("注释行数 ：%d.\n", n);
+    fclose(fp);
 }
 
 /*主函数*/
