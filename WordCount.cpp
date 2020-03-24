@@ -179,30 +179,31 @@ int main (int argc, char *argv[]){
 	struct timeval end;
 	unsigned long timer;
 	gettimeofday(&start, NULL);
+	int i;
+	for(i=1;i<argc;i++){
+		
+		/*字符统计*/ 
+		if(!strcmp(argv[i],"-c")){
+			printf("charnumber:%d\n",CharNum(argv[argc-1]));
+		}
+		/*词数统计*/
+		else if(!strcmp(argv[i],"-w")){
+			printf("wordnumber:%d\n",WordNum(argv[argc-1]));
+		}
+		/*行数统计*/
+		else if (!strcmp(argv[i],"-l")){
+			printf("linenumber:%d\n",LineNum(argv[argc-1]));
+		}
+		/*寻找目录下txt、cpp文件*/
+		else if(!strcmp(argv[i],"-s")){
+			searchfile();
+		}
+		/*更多统计*/
+		else if(!strcmp(argv[i],"-a")){
+			MoreData(argv[argc-1]);
+		}
+	}
 
-	/*字符统计*/ 
-	if(!strcmp(argv[1],"-c")){
-		printf("charnumber:%d\n",CharNum(argv[2]));
-	}
-	/*词数统计*/
-	else if(!strcmp(argv[1],"-w")){
-		printf("wordnumber:%d\n",WordNum(argv[2]));
-	}
-	/*行数统计*/
-	else if (!strcmp(argv[1],"-l")){
-		printf("linenumber:%d\n",LineNum(argv[2]));
-	}
-	/*寻找目录下txt、cpp文件*/
-	else if(!strcmp(argv[1],"-s")){
-		searchfile();
-	}
-	/*更多统计*/
-	else if(!strcmp(argv[1],"-a")){
-		MoreData(argv[2]);
-	}
-
-	/* 程序块结束后计时end */
-	/* 统计程序段运行时间(unit is usec)*/
 	gettimeofday(&end, NULL);
 	timer = 1000000 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
 	printf("耗时 = %ld us\n", timer);
