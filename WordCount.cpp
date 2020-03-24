@@ -97,50 +97,45 @@ int searchfile(void){
 }
 
 /*更多统计*/
-void MoreData(char *file){
+void MoreData(char *file)
+{
     FILE *fp;
-    char ch;
-    int c = 0, e = 0, n = 0;	//c：code	e：empty	n：note 
     if ((fp=fopen(file,"r")) == NULL){
         printf("找不到文件！");
         exit(0);
     }
+	int empty = 0,code = 0,note = 0,state1= 0,state2=0;
+	char ch;
 	//开始 
-    ch = fgetc(fp);
-    while (ch != EOF){
-    	//判断空行数 
-        if (ch == '{' || ch == '}'){
-            e++;
-            ch = fgetc(fp);
-        }
-        else if (ch == '\n'){
-            ch = fgetc(fp);
-            while (ch == '\n'){
-                e++;
-                ch = fgetc(fp);
-            }
-        }
-        //判断注释行数 
-        else if (ch == '/'){
-            ch = fgetc(fp);
-            if (ch == '/')
-            while (ch != '\n')	ch = fgetc(fp);
-            n++;
-            ch = fgetc(fp);
-        }
-        //判断代码行数 
-        else{
-            c++;
-            while (ch != '{'&&ch != '}'&&ch != '\n'&&ch != '/'&&ch != EOF){
-                ch = fgetc(fp);
-            }
-        }
-
-    }
-    printf("代码行数 ：%d.\n", c);
-    printf("空行数 ：%d.\n", e);
-    printf("注释行数 ：%d.\n", n);
-    fclose(fp);
+	while(!feof(fp)){
+		ch = fgetc(fp);
+		if(ch=='\n'||ch==EOF){
+			if(state2==0)	//空行 
+				empty++;
+			else if(state2==1){	//代码行 
+				code++;
+				state2 = 0;
+			}
+			else{	//注释行 
+				note++;
+				state2 = 0;
+			}
+		}
+		else if(ch!=' '&&ch!='\t'&&ch!='{'&&ch!='}'){
+			if(ch=='/'){
+				if(state2==0&&state1==0)
+					state1 = 1;
+				else if(state2==0&&state1==1){
+					state2 = 2;
+					state1 = 0;
+				}
+			} 
+			else if(state2!=2)
+				state2 = 1;	 
+		}
+	}
+	printf("空行数为：%d  代码行数为：%d  注释行数为：%d\n",empty,code,note);
+	fclose(fp);
 }
 
 /*主函数*/
